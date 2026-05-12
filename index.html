@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OceanShield Global — Operational Footprint</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&family=Barlow+Condensed:wght@400;600;700&display=swap" rel="stylesheet"/>
+<style>
+:root {
+  --navy: #07111f;
+  --navy2: #0b1a2e;
+  --navy3: #0f2440;
+  --panel: #091828;
+  --border: rgba(255,255,255,0.07);
+  --blue: #2e86de;
+  --teal: #1dd1a1;
+  --amber: #feca57;
+  --purple: #a29bfe;
+  --pink: #fd79a8;
+  --text: #c8dff0;
+  --muted: #4a7a9b;
+  --font-head: 'Barlow Condensed', sans-serif;
+  --font-body: 'Barlow', sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:100%;height:100%;overflow:hidden;background:var(--navy);color:var(--text);font-family:var(--font-body)}
+
+/* TOP BAR */
+#topbar{
+  position:fixed;top:0;left:0;right:0;height:56px;
+  background:rgba(7,17,31,0.97);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  padding:0 20px;z-index:100;backdrop-filter:blur(8px);
+}
+#logo{display:flex;align-items:center;gap:12px}
+#logo-icon{width:36px;height:36px;background:linear-gradient(135deg,#0f3460,#1a5fa0);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+#logo-text .name{font-family:var(--font-head);font-size:18px;font-weight:700;color:#e8f4ff;letter-spacing:.04em}
+#logo-text .sub{font-size:11px;color:var(--muted);letter-spacing:.06em;text-transform:uppercase}
+#nav-filters{display:flex;gap:6px;align-items:center}
+#nav-filters span{font-size:11px;color:var(--muted);margin-right:4px;text-transform:uppercase;letter-spacing:.06em}
+.fbtn{
+  font-family:var(--font-body);font-size:11px;font-weight:500;
+  padding:5px 13px;border-radius:20px;border:1px solid rgba(255,255,255,0.12);
+  background:transparent;color:var(--muted);cursor:pointer;
+  transition:all .15s;white-space:nowrap;letter-spacing:.02em;
+}
+.fbtn:hover{background:rgba(255,255,255,0.06);color:var(--text)}
+.fbtn.active{border-color:currentColor;color:#fff}
+.fbtn[data-id="all"].active{color:#fff;border-color:rgba(255,255,255,0.4)}
+.fbtn[data-id="uae"].active{color:var(--blue);border-color:var(--blue);background:rgba(46,134,222,0.1)}
+.fbtn[data-id="sg"].active{color:var(--teal);border-color:var(--teal);background:rgba(29,209,161,0.1)}
+.fbtn[data-id="in"].active{color:var(--amber);border-color:var(--amber);background:rgba(254,202,87,0.1)}
+.fbtn[data-id="no"].active{color:var(--purple);border-color:var(--purple);background:rgba(162,155,254,0.1)}
+.fbtn[data-id="gh"].active{color:var(--pink);border-color:var(--pink);background:rgba(253,121,168,0.1)}
+#reset-btn{
+  font-size:11px;padding:5px 10px;background:transparent;
+  border:1px solid var(--border);color:var(--muted);border-radius:6px;cursor:pointer;
+  font-family:var(--font-body);transition:all .15s;
+}
+#reset-btn:hover{color:var(--text);border-color:rgba(255,255,255,0.2)}
+
+/* LAYOUT */
+#layout{display:flex;height:100vh;padding-top:56px}
+#map-wrap{flex:1;position:relative;overflow:hidden;background:var(--navy)}
+#map-wrap svg{display:block;width:100%;height:100%}
+
+/* SIDE PANEL */
+#side{
+  width:280px;flex-shrink:0;background:var(--panel);
+  border-left:1px solid var(--border);display:flex;flex-direction:column;
+  overflow:hidden;
+}
+#side-header{padding:16px 18px 12px;border-bottom:1px solid var(--border)}
+#side-header .sh-title{font-family:var(--font-head);font-size:13px;font-weight:600;color:#e8f4ff;text-transform:uppercase;letter-spacing:.08em}
+#side-header .sh-count{font-size:11px;color:var(--muted);margin-top:2px}
+#port-search{
+  padding:10px 18px;border-bottom:1px solid var(--border);
+}
+#port-search input{
+  width:100%;background:rgba(255,255,255,0.05);border:1px solid var(--border);
+  border-radius:6px;padding:6px 10px;color:var(--text);font-size:12px;
+  font-family:var(--font-body);outline:none;
+}
+#port-search input::placeholder{color:var(--muted)}
+#port-search input:focus{border-color:rgba(255,255,255,0.2)}
+#port-list{flex:1;overflow-y:auto;padding:8px 0}
+#port-list::-webkit-scrollbar{width:3px}
+#port-list::-webkit-scrollbar-track{background:transparent}
+#port-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1);border-radius:2px}
+
+.port-item{
+  display:flex;align-items:center;gap:10px;padding:8px 18px;
+  cursor:pointer;transition:background .12s;border-bottom:1px solid rgba(255,255,255,0.03);
+}
+.port-item:hover{background:rgba(255,255,255,0.04)}
+.port-item.active{background:rgba(255,255,255,0.07)}
+.pi-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pi-info{flex:1;min-width:0}
+.pi-name{font-size:12px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pi-office{font-size:10px;color:var(--muted);margin-top:1px}
+.pi-badge{font-size:9px;padding:2px 7px;border-radius:3px;flex-shrink:0;font-weight:500}
+
+/* DETAIL PANEL */
+#detail-panel{
+  position:absolute;top:72px;right:296px;width:300px;
+  background:rgba(9,24,40,0.97);border:1px solid var(--border);
+  border-radius:12px;backdrop-filter:blur(12px);padding:18px;
+  display:none;z-index:50;
+}
+#detail-panel.visible{display:block}
+#dp-close{position:absolute;top:12px;right:12px;background:transparent;border:none;color:var(--muted);cursor:pointer;font-size:18px;line-height:1}
+#dp-close:hover{color:var(--text)}
+#dp-color-bar{height:3px;border-radius:2px;margin-bottom:14px}
+#dp-title{font-family:var(--font-head);font-size:17px;font-weight:700;color:#e8f4ff;margin-bottom:2px}
+#dp-subtitle{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+#dp-type{font-size:11px;padding:3px 9px;border-radius:4px;display:inline-block;margin-bottom:12px;font-weight:500}
+#dp-body{font-size:12px;color:var(--muted);line-height:1.8}
+#dp-services{margin-top:12px}
+#dp-services .ds-label{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+.svc-tag{display:inline-block;font-size:10px;padding:3px 8px;border-radius:4px;margin:2px 2px 0 0;border:0.5px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6)}
+#dp-ports-section{margin-top:14px;padding-top:12px;border-top:1px solid var(--border)}
+#dp-ports-section .dp-pl{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin-bottom:6px}
+#dp-ports-list{font-size:11px;color:var(--text);line-height:2;max-height:140px;overflow-y:auto}
+#dp-ports-list::-webkit-scrollbar{width:2px}
+#dp-ports-list::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.1)}
+
+/* STATS BAR */
+#stats-bar{
+  position:fixed;bottom:0;left:0;right:280px;
+  background:rgba(7,17,31,0.97);border-top:1px solid var(--border);
+  display:flex;align-items:center;padding:0 20px;height:42px;gap:28px;
+  backdrop-filter:blur(8px);z-index:100;
+}
+.stat{display:flex;align-items:baseline;gap:6px}
+.stat-v{font-family:var(--font-head);font-size:16px;font-weight:700;color:#4a9de0}
+.stat-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+#legend{margin-left:auto;display:flex;gap:14px;align-items:center}
+.leg{display:flex;align-items:center;gap:5px;font-size:10px;color:var(--muted)}
+.leg-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+/* MAP elements */
+.country-path{fill:#10223a;stroke:#1a3550;stroke-width:.3}
+.graticule{fill:none;stroke:#0d1e30;stroke-width:.3}
+.sphere{fill:#07111f}
+.conn-line{stroke-dasharray:5,4;fill:none;opacity:.35}
+.port-dot{cursor:pointer;transition:r .15s}
+.port-dot:hover{r:5}
+.office-marker{cursor:pointer}
+.office-marker circle.outer{opacity:.12}
+.office-pulse{animation:pulse 2.5s ease-out infinite}
+@keyframes pulse{0%{opacity:.6}100%{opacity:0;r:20}}
+.dimmed{opacity:.15}
+.highlighted{}
+
+/* TOOLTIP */
+#map-tooltip{
+  position:absolute;background:rgba(9,24,40,0.95);border:1px solid var(--border);
+  border-radius:8px;padding:8px 12px;pointer-events:none;opacity:0;
+  transition:opacity .15s;font-size:12px;white-space:nowrap;z-index:60;
+}
+#map-tooltip.show{opacity:1}
+#map-tooltip .tt-name{font-weight:500;color:#e8f4ff;margin-bottom:2px}
+#map-tooltip .tt-office{font-size:10px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div id="topbar">
+  <div id="logo">
+    <div id="logo-icon">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#4a9de0" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 17h18M3 17l3-9 6 4 4-6 5 11M3 17v3h18v-3"/>
+      </svg>
+    </div>
+    <div id="logo-text">
+      <div class="name">OceanShield Global</div>
+      <div class="sub">Operational Footprint</div>
+    </div>
+  </div>
+  <div id="nav-filters">
+    <span>Filter by office:</span>
+    <button class="fbtn active" data-id="all">All</button>
+    <button class="fbtn" data-id="uae">UAE HQ</button>
+    <button class="fbtn" data-id="sg">Singapore</button>
+    <button class="fbtn" data-id="in">India</button>
+    <button class="fbtn" data-id="no">Norway</button>
+    <button class="fbtn" data-id="gh">Ghana</button>
+    <button id="reset-btn">↺ Reset</button>
+  </div>
+</div>
+
+<!-- LAYOUT -->
+<div id="layout">
+  <div id="map-wrap">
+    <svg id="world-svg"></svg>
+    <div id="map-tooltip"><div class="tt-name"></div><div class="tt-office"></div></div>
+  </div>
+  <div id="side">
+    <div id="side-header">
+      <div class="sh-title">Ports &amp; Locations</div>
+      <div class="sh-count" id="port-count">Loading...</div>
+    </div>
+    <div id="port-search"><input type="text" id="search-input" placeholder="Search port or country…"/></div>
+    <div id="port-list"></div>
+  </div>
+</div>
+
+<!-- DETAIL PANEL -->
+<div id="detail-panel">
+  <button id="dp-close">×</button>
+  <div id="dp-color-bar"></div>
+  <div id="dp-title"></div>
+  <div id="dp-subtitle"></div>
+  <div id="dp-type"></div>
+  <div id="dp-body"></div>
+  <div id="dp-services"></div>
+  <div id="dp-ports-section">
+    <div class="dp-pl">Ports served from this office</div>
+    <div id="dp-ports-list"></div>
+  </div>
+</div>
+
+<!-- STATS BAR -->
+<div id="stats-bar">
+  <div class="stat"><span class="stat-v">5</span><span class="stat-l">Offices</span></div>
+  <div class="stat"><span class="stat-v">3</span><span class="stat-l">Continents</span></div>
+  <div class="stat"><span class="stat-v" id="port-stat">—</span><span class="stat-l">Ports covered</span></div>
+  <div class="stat"><span class="stat-v">IMO</span><span class="stat-l">Certified</span></div>
+  <div class="stat"><span class="stat-v">SIRE 2.0</span><span class="stat-l">Inspections</span></div>
+  <div id="legend">
+    <div class="leg"><div class="leg-dot" style="background:#2e86de"></div>UAE HQ</div>
+    <div class="leg"><div class="leg-dot" style="background:#1dd1a1"></div>Singapore</div>
+    <div class="leg"><div class="leg-dot" style="background:#feca57"></div>India</div>
+    <div class="leg"><div class="leg-dot" style="background:#a29bfe"></div>Norway</div>
+    <div class="leg"><div class="leg-dot" style="background:#fd79a8"></div>Ghana</div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+const OFFICES = {
+  uae: {
+    id:"uae", name:"Ras Al Khaimah, UAE", short:"UAE HQ", color:"#2e86de",
+    coords:[55.9,25.8], hq:true,
+    role:"Global Headquarters — Middle East, Africa & Europe Hub",
+    services:["ISM / ISPS / MLC Audits","Pre-Vetting & Pre-PSC Inspections","MARPOL & Bunker Compliance","Cybersecurity Audits","Dry Dock Readiness","Environmental Audits","Flag State Advisory"],
+    region:"UAE · Oman · Bahrain · Kuwait · Qatar · Saudi Arabia · Egypt · Jordan · Pakistan · East Africa"
+  },
+  sg: {
+    id:"sg", name:"Singapore", short:"Singapore", color:"#1dd1a1",
+    coords:[103.8,1.35],
+    role:"Asia Pacific Regional Office",
+    services:["SIRE 2.0 Inspections","Port State Control Support","Tanker Vetting","CDI Audits","Remote / Hybrid Audits","Class Liaison"],
+    region:"Singapore · Malaysia · Indonesia · Vietnam · Philippines · Thailand · China · South Korea · Japan · Australia · Taiwan"
+  },
+  in: {
+    id:"in", name:"Mumbai, India", short:"India", color:"#feca57",
+    coords:[72.87,19.07],
+    role:"South Asia Expert Base",
+    services:["ISM Internal Audits","Pre-Vetting Inspections","MLC Compliance Reviews","Technical Assessments","PSC Deficiency Rectification"],
+    region:"India · Sri Lanka · Bangladesh · Maldives · Myanmar"
+  },
+  no: {
+    id:"no", name:"Oslo, Norway", short:"Norway", color:"#a29bfe",
+    coords:[10.75,59.91],
+    role:"European Maritime Centre",
+    services:["Flag State Compliance","Environmental Audits","IMO Regulatory Advisory","Cybersecurity Audits","Class Society Liaison","MOU Inspections"],
+    region:"Norway · UK · Netherlands · Denmark · Sweden · Germany · Belgium · Finland · Baltic States · USA · Canada · Brazil"
+  },
+  gh: {
+    id:"gh", name:"Accra, Ghana", short:"Ghana", color:"#fd79a8",
+    coords:[-0.19,5.56],
+    role:"West Africa Regional Office",
+    services:["Port State Control Support","Pre-PSC Inspections","MARPOL Compliance","Vessel Vetting","Oil Major Pre-Vetting"],
+    region:"Ghana · Nigeria · Ivory Coast · Togo · Senegal · Cameroon · Gabon · Angola · Congo"
+  }
+};
+
+const PORTS = [
+  {name:"Jebel Ali",country:"UAE",coords:[55.02,24.98],office:"uae"},
+  {name:"Port of Fujairah",country:"UAE",coords:[56.35,25.12],office:"uae"},
+  {name:"Abu Dhabi Port",country:"UAE",coords:[54.43,24.47],office:"uae"},
+  {name:"Port of Sharjah",country:"UAE",coords:[55.39,25.35],office:"uae"},
+  {name:"Sohar Port",country:"Oman",coords:[56.64,24.35],office:"uae"},
+  {name:"Salalah Port",country:"Oman",coords:[54.0,16.93],office:"uae"},
+  {name:"Port of Muscat",country:"Oman",coords:[58.6,23.62],office:"uae"},
+  {name:"Hamad Port",country:"Qatar",coords:[51.58,24.97],office:"uae"},
+  {name:"King Abdulaziz Port",country:"Saudi Arabia",coords:[49.65,26.43],office:"uae"},
+  {name:"Jeddah Islamic Port",country:"Saudi Arabia",coords:[39.17,21.47],office:"uae"},
+  {name:"Jubail Industrial Port",country:"Saudi Arabia",coords:[49.65,27.0],office:"uae"},
+  {name:"Mina Salman",country:"Bahrain",coords:[50.59,26.18],office:"uae"},
+  {name:"Shuwaikh Port",country:"Kuwait",coords:[47.93,29.37],office:"uae"},
+  {name:"Port of Aden",country:"Yemen",coords:[45.0,12.8],office:"uae"},
+  {name:"Port Said",country:"Egypt",coords:[32.28,31.26],office:"uae"},
+  {name:"Alexandria Port",country:"Egypt",coords:[29.87,31.2],office:"uae"},
+  {name:"Ain Sokhna",country:"Egypt",coords:[32.35,29.6],office:"uae"},
+  {name:"Port of Djibouti",country:"Djibouti",coords:[43.14,11.6],office:"uae"},
+  {name:"Mombasa Port",country:"Kenya",coords:[39.68,-4.07],office:"uae"},
+  {name:"Dar es Salaam",country:"Tanzania",coords:[39.3,-6.85],office:"uae"},
+  {name:"Karachi Port",country:"Pakistan",coords:[66.97,24.85],office:"uae"},
+  {name:"Port Qasim",country:"Pakistan",coords:[67.32,24.78],office:"uae"},
+
+  {name:"Port of Singapore",country:"Singapore",coords:[103.82,1.27],office:"sg"},
+  {name:"Port Klang",country:"Malaysia",coords:[101.4,3.0],office:"sg"},
+  {name:"Penang Port",country:"Malaysia",coords:[100.33,5.42],office:"sg"},
+  {name:"Johor Port",country:"Malaysia",coords:[103.73,1.47],office:"sg"},
+  {name:"Tanjung Pelepas",country:"Malaysia",coords:[103.55,1.37],office:"sg"},
+  {name:"Tanjung Priok",country:"Indonesia",coords:[106.88,-6.1],office:"sg"},
+  {name:"Surabaya Port",country:"Indonesia",coords:[112.73,-7.2],office:"sg"},
+  {name:"Ho Chi Minh Port",country:"Vietnam",coords:[106.7,10.8],office:"sg"},
+  {name:"Haiphong Port",country:"Vietnam",coords:[106.68,20.87],office:"sg"},
+  {name:"Laem Chabang",country:"Thailand",coords:[100.88,13.08],office:"sg"},
+  {name:"Manila North Harbour",country:"Philippines",coords:[120.97,14.6],office:"sg"},
+  {name:"Subic Bay",country:"Philippines",coords:[120.27,14.8],office:"sg"},
+  {name:"Shanghai Port",country:"China",coords:[121.47,31.23],office:"sg"},
+  {name:"Ningbo-Zhoushan",country:"China",coords:[121.87,29.87],office:"sg"},
+  {name:"Shenzhen Port",country:"China",coords:[114.0,22.5],office:"sg"},
+  {name:"Guangzhou Port",country:"China",coords:[113.27,23.13],office:"sg"},
+  {name:"Tianjin Port",country:"China",coords:[117.73,38.98],office:"sg"},
+  {name:"Qingdao Port",country:"China",coords:[120.38,36.07],office:"sg"},
+  {name:"Busan Port",country:"South Korea",coords:[129.07,35.1],office:"sg"},
+  {name:"Incheon Port",country:"South Korea",coords:[126.6,37.45],office:"sg"},
+  {name:"Port of Yokohama",country:"Japan",coords:[139.65,35.44],office:"sg"},
+  {name:"Port of Kobe",country:"Japan",coords:[135.2,34.68],office:"sg"},
+  {name:"Port of Nagoya",country:"Japan",coords:[136.88,35.05],office:"sg"},
+  {name:"Port of Fremantle",country:"Australia",coords:[115.74,-32.05],office:"sg"},
+  {name:"Port of Melbourne",country:"Australia",coords:[144.93,-37.82],office:"sg"},
+  {name:"Port of Sydney",country:"Australia",coords:[151.21,-33.87],office:"sg"},
+
+  {name:"JNPT Mumbai",country:"India",coords:[72.95,18.95],office:"in"},
+  {name:"Mundra Port",country:"India",coords:[69.7,22.83],office:"in"},
+  {name:"Kandla Port",country:"India",coords:[70.22,23.01],office:"in"},
+  {name:"Chennai Port",country:"India",coords:[80.3,13.08],office:"in"},
+  {name:"Vizag Port",country:"India",coords:[83.28,17.68],office:"in"},
+  {name:"Kolkata Port",country:"India",coords:[88.33,22.57],office:"in"},
+  {name:"Kochi Port",country:"India",coords:[76.27,9.97],office:"in"},
+  {name:"Tuticorin Port",country:"India",coords:[78.13,8.75],office:"in"},
+  {name:"New Mangalore Port",country:"India",coords:[74.82,12.92],office:"in"},
+  {name:"Colombo Port",country:"Sri Lanka",coords:[79.85,6.93],office:"in"},
+  {name:"Hambantota",country:"Sri Lanka",coords:[81.12,6.12],office:"in"},
+  {name:"Chittagong Port",country:"Bangladesh",coords:[91.83,22.32],office:"in"},
+  {name:"Male Port",country:"Maldives",coords:[73.51,4.17],office:"in"},
+  {name:"Yangon Port",country:"Myanmar",coords:[96.18,16.8],office:"in"},
+
+  {name:"Port of Rotterdam",country:"Netherlands",coords:[4.0,51.9],office:"no"},
+  {name:"Port of Antwerp",country:"Belgium",coords:[4.4,51.23],office:"no"},
+  {name:"Port of Hamburg",country:"Germany",coords:[9.99,53.54],office:"no"},
+  {name:"Port of Bremen",country:"Germany",coords:[8.8,53.08],office:"no"},
+  {name:"Felixstowe",country:"UK",coords:[1.35,51.96],office:"no"},
+  {name:"Port of Southampton",country:"UK",coords:[-1.4,50.9],office:"no"},
+  {name:"London Gateway",country:"UK",coords:[0.47,51.5],office:"no"},
+  {name:"Port of Le Havre",country:"France",coords:[0.1,49.49],office:"no"},
+  {name:"Port of Marseille",country:"France",coords:[5.35,43.3],office:"no"},
+  {name:"Port of Gothenburg",country:"Sweden",coords:[11.97,57.7],office:"no"},
+  {name:"Port of Oslo",country:"Norway",coords:[10.74,59.9],office:"no"},
+  {name:"Stavanger Port",country:"Norway",coords:[5.73,58.97],office:"no"},
+  {name:"Port of Copenhagen",country:"Denmark",coords:[12.6,55.67],office:"no"},
+  {name:"Port of Helsinki",country:"Finland",coords:[24.96,60.16],office:"no"},
+  {name:"Port of Tallinn",country:"Estonia",coords:[24.74,59.44],office:"no"},
+  {name:"Port of Riga",country:"Latvia",coords:[24.1,56.95],office:"no"},
+  {name:"Port of Gdansk",country:"Poland",coords:[18.65,54.35],office:"no"},
+  {name:"Algeciras",country:"Spain",coords:[-5.45,36.13],office:"no"},
+  {name:"Valencia Port",country:"Spain",coords:[-0.32,39.46],office:"no"},
+  {name:"Port of Genoa",country:"Italy",coords:[8.93,44.4],office:"no"},
+  {name:"Port of Piraeus",country:"Greece",coords:[23.63,37.95],office:"no"},
+  {name:"Port of Houston",country:"USA",coords:[-95.27,29.73],office:"no"},
+  {name:"Port of Vancouver",country:"Canada",coords:[-123.1,49.28],office:"no"},
+  {name:"Port of Santos",country:"Brazil",coords:[-46.33,-23.95],office:"no"},
+  {name:"Port of Kaohsiung",country:"Taiwan",coords:[120.28,22.62],office:"sg"},
+  {name:"Port of Keelung",country:"Taiwan",coords:[121.74,25.13],office:"sg"},
+
+  {name:"Tema Port",country:"Ghana",coords:[-0.02,5.62],office:"gh"},
+  {name:"Takoradi Port",country:"Ghana",coords:[-1.75,4.9],office:"gh"},
+  {name:"Apapa Port",country:"Nigeria",coords:[3.38,6.43],office:"gh"},
+  {name:"Tin Can Island",country:"Nigeria",coords:[3.32,6.42],office:"gh"},
+  {name:"Onne Port",country:"Nigeria",coords:[7.15,4.73],office:"gh"},
+  {name:"Warri Port",country:"Nigeria",coords:[5.75,5.52],office:"gh"},
+  {name:"Abidjan Port",country:"Ivory Coast",coords:[-4.02,5.35],office:"gh"},
+  {name:"Lomé Port",country:"Togo",coords:[1.23,6.13],office:"gh"},
+  {name:"Cotonou Port",country:"Benin",coords:[2.43,6.35],office:"gh"},
+  {name:"Dakar Port",country:"Senegal",coords:[-17.44,14.67],office:"gh"},
+  {name:"Conakry Port",country:"Guinea",coords:[-13.7,9.52],office:"gh"},
+  {name:"Douala Port",country:"Cameroon",coords:[9.7,4.05],office:"gh"},
+  {name:"Libreville Port",country:"Gabon",coords:[9.45,0.39],office:"gh"},
+  {name:"Pointe-Noire",country:"Congo",coords:[11.86,-4.78],office:"gh"},
+  {name:"Luanda Port",country:"Angola",coords:[13.23,-8.84],office:"gh"},
+  {name:"Walvis Bay",country:"Namibia",coords:[14.51,-22.96],office:"gh"},
+  {name:"Durban Port",country:"South Africa",coords:[31.03,-29.87],office:"gh"},
+  {name:"Cape Town Port",country:"South Africa",coords:[18.42,-33.9],office:"gh"},
+];
+
+const ROUTES = [["uae","sg"],["uae","in"],["uae","no"],["uae","gh"],["sg","in"],["no","gh"]];
+
+let activeFilter = "all";
+let selectedItem = null;
+const svg = d3.select("#world-svg");
+const mapWrap = document.getElementById("map-wrap");
+
+function getSize(){
+  return {w: mapWrap.clientWidth, h: mapWrap.clientHeight};
+}
+
+let {w, h} = getSize();
+svg.attr("viewBox",`0 0 ${w} ${h}`).attr("width",w).attr("height",h);
+
+const proj = d3.geoNaturalEarth1().scale(w/6).translate([w/2, h/2+20]);
+const geoPath = d3.geoPath(proj);
+
+const zoom = d3.zoom().scaleExtent([1,8]).on("zoom", e => {
+  mapG.attr("transform", e.transform);
+});
+svg.call(zoom);
+
+const mapG = svg.append("g");
+
+const tooltip = document.getElementById("map-tooltip");
+
+function showTooltip(e, name, office){
+  tooltip.querySelector(".tt-name").textContent = name;
+  tooltip.querySelector(".tt-office").textContent = "Served by: " + OFFICES[office].short;
+  tooltip.querySelector(".tt-office").style.color = OFFICES[office].color;
+  tooltip.classList.add("show");
+}
+function moveTooltip(e){
+  const r = mapWrap.getBoundingClientRect();
+  let x = e.clientX - r.left + 14;
+  let y = e.clientY - r.top - 36;
+  if(x+200 > w) x = e.clientX - r.left - 210;
+  tooltip.style.left = x+"px";
+  tooltip.style.top = y+"px";
+}
+function hideTooltip(){ tooltip.classList.remove("show"); }
+
+d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json").then(world => {
+  mapG.append("path").datum({type:"Sphere"}).attr("class","sphere").attr("d",geoPath);
+  mapG.append("path")
+    .datum(d3.geoGraticule()())
+    .attr("class","graticule").attr("d",geoPath);
+  mapG.append("g").selectAll("path")
+    .data(topojson.feature(world, world.objects.countries).features)
+    .join("path").attr("class","country-path").attr("d",geoPath);
+
+  const routeG = mapG.append("g").attr("class","routes");
+  ROUTES.forEach(([a,b]) => {
+    const pa = proj(OFFICES[a].coords);
+    const pb = proj(OFFICES[b].coords);
+    const mx=(pa[0]+pb[0])/2, my=(pa[1]+pb[1])/2 - Math.abs(pa[0]-pb[0])*0.15;
+    routeG.append("path")
+      .attr("class","conn-line")
+      .attr("stroke", OFFICES[a].color)
+      .attr("d",`M${pa[0]},${pa[1]} Q${mx},${my} ${pb[0]},${pb[1]}`);
+  });
+
+  const portG = mapG.append("g").attr("class","ports-layer");
+  PORTS.forEach(p => {
+    const [x,y] = proj(p.coords);
+    const o = OFFICES[p.office];
+    portG.append("circle")
+      .attr("class","port-dot")
+      .attr("data-id", p.name)
+      .attr("data-office", p.office)
+      .attr("cx",x).attr("cy",y).attr("r",3.5)
+      .attr("fill", o.color).attr("opacity",.7)
+      .attr("stroke","rgba(0,0,0,0.4)").attr("stroke-width",.5)
+      .on("mouseenter", (e) => { showTooltip(e, p.name + " — " + p.country, p.office); })
+      .on("mousemove", moveTooltip)
+      .on("mouseleave", hideTooltip)
+      .on("click", () => selectPort(p));
+  });
+
+  const officeG = mapG.append("g").attr("class","offices-layer");
+  Object.values(OFFICES).forEach(o => {
+    const [x,y] = proj(o.coords);
+    const g = officeG.append("g")
+      .attr("class","office-marker")
+      .attr("data-id", o.id)
+      .attr("transform",`translate(${x},${y})`);
+
+    g.append("circle").attr("class","office-pulse")
+      .attr("r",8).attr("fill",o.color).attr("opacity",.15);
+    g.append("circle").attr("class","outer")
+      .attr("r",13).attr("fill",o.color);
+    g.append("circle")
+      .attr("r",10).attr("fill","#091828").attr("stroke",o.color).attr("stroke-width",2);
+    g.append("circle").attr("r",4).attr("fill",o.color);
+
+    if(o.hq){
+      g.append("text").attr("x",0).attr("y",-17)
+        .attr("text-anchor","middle").attr("font-size","8")
+        .attr("fill","#feca57").attr("font-family","Barlow Condensed, sans-serif")
+        .attr("font-weight","600").text("★ HQ");
+    }
+
+    const lx = x > w*0.72 ? -16 : 16;
+    const anchor = x > w*0.72 ? "end" : "start";
+    g.append("text")
+      .attr("x",lx).attr("y", o.hq ? -3 : 4)
+      .attr("text-anchor",anchor).attr("font-size","9.5")
+      .attr("fill",o.color).attr("font-family","Barlow Condensed, sans-serif")
+      .attr("font-weight","600").text(o.name);
+
+    g.on("mouseenter", (e) => {
+      showTooltip(e, o.name, o.id);
+      tooltip.querySelector(".tt-office").textContent = o.role;
+    })
+    .on("mousemove", moveTooltip)
+    .on("mouseleave", hideTooltip)
+    .on("click", () => selectOffice(o.id));
+  });
+
+  buildPortList(PORTS);
+  document.getElementById("port-stat").textContent = PORTS.length;
+  document.getElementById("port-count").textContent = `${PORTS.length} ports across ${[...new Set(PORTS.map(p=>p.country))].length} countries`;
+});
+
+function buildPortList(ports){
+  const list = document.getElementById("port-list");
+  list.innerHTML = "";
+  ports.forEach(p => {
+    const o = OFFICES[p.office];
+    const div = document.createElement("div");
+    div.className = "port-item";
+    div.dataset.name = p.name;
+    div.innerHTML = `
+      <div class="pi-dot" style="background:${o.color}"></div>
+      <div class="pi-info">
+        <div class="pi-name">${p.name}</div>
+        <div class="pi-office">${p.country} · ${o.short}</div>
+      </div>
+      <div class="pi-badge" style="background:${o.color}18;color:${o.color};border:0.5px solid ${o.color}44">${o.short}</div>
+    `;
+    div.addEventListener("click", () => selectPort(p));
+    list.appendChild(div);
+  });
+}
+
+function selectPort(p){
+  selectedItem = {type:"port", data:p};
+  const o = OFFICES[p.office];
+  const dp = document.getElementById("detail-panel");
+  document.getElementById("dp-color-bar").style.background = o.color;
+  document.getElementById("dp-title").textContent = p.name;
+  document.getElementById("dp-subtitle").textContent = p.country;
+  document.getElementById("dp-type").textContent = "Port";
+  document.getElementById("dp-type").style.cssText = `background:${o.color}20;color:${o.color};border:0.5px solid ${o.color}44;font-size:11px;padding:3px 9px;border-radius:4px;display:inline-block;margin-bottom:12px;font-weight:500`;
+  document.getElementById("dp-body").innerHTML = `<strong style="color:${o.color}">${o.name}</strong> is the designated OceanShield office serving this port.<br><br>Region: ${o.region}`;
+  document.getElementById("dp-services").innerHTML = `<div class="ds-label">Services available at this port</div>${o.services.map(s=>`<span class="svc-tag">${s}</span>`).join("")}`;
+  document.getElementById("dp-ports-section").style.display = "none";
+  dp.classList.add("visible");
+
+  document.querySelectorAll(".port-item").forEach(el => {
+    el.classList.toggle("active", el.dataset.name === p.name);
+  });
+  zoomTo(p.coords);
+}
+
+function selectOffice(id){
+  selectedItem = {type:"office", id};
+  const o = OFFICES[id];
+  const portsByOffice = PORTS.filter(p=>p.office===id);
+  const dp = document.getElementById("detail-panel");
+  document.getElementById("dp-color-bar").style.background = o.color;
+  document.getElementById("dp-title").textContent = o.name + (o.hq ? " ★" : "");
+  document.getElementById("dp-title").style.color = o.color;
+  document.getElementById("dp-subtitle").textContent = o.role;
+  document.getElementById("dp-type").textContent = o.hq ? "Global HQ" : "Regional Office";
+  document.getElementById("dp-type").style.cssText = `background:${o.color}20;color:${o.color};border:0.5px solid ${o.color}44;font-size:11px;padding:3px 9px;border-radius:4px;display:inline-block;margin-bottom:12px;font-weight:500`;
+  document.getElementById("dp-body").innerHTML = `Coverage: <span style="color:${o.color}">${o.region}</span>`;
+  document.getElementById("dp-services").innerHTML = `<div class="ds-label">Services offered</div>${o.services.map(s=>`<span class="svc-tag">${s}</span>`).join("")}`;
+  document.getElementById("dp-ports-section").style.display = "block";
+  document.getElementById("dp-ports-list").innerHTML = portsByOffice.map(p=>`<div style="display:flex;align-items:center;gap:6px"><div style="width:5px;height:5px;border-radius:50%;background:${o.color};flex-shrink:0"></div>${p.name}, ${p.country}</div>`).join("");
+  dp.classList.add("visible");
+
+  setFilter(id);
+  zoomTo(o.coords, 3);
+}
+
+function zoomTo(coords, scale){
+  const [x,y] = proj(coords);
+  const s = scale || 4;
+  svg.transition().duration(700).call(
+    zoom.transform,
+    d3.zoomIdentity.translate(w/2 - s*x, h/2 - s*y).scale(s)
+  );
+}
+
+function setFilter(id){
+  activeFilter = id;
+  document.querySelectorAll(".fbtn").forEach(b => {
+    b.classList.toggle("active", b.dataset.id === id);
+  });
+  d3.selectAll(".port-dot").classed("dimmed", function(){
+    if(id==="all") return false;
+    return this.getAttribute("data-office") !== id;
+  });
+  d3.selectAll(".office-marker").classed("dimmed", function(){
+    if(id==="all") return false;
+    return this.getAttribute("data-id") !== id;
+  });
+  d3.selectAll(".conn-line").classed("dimmed", id !== "all");
+
+  const filtered = id==="all" ? PORTS : PORTS.filter(p=>p.office===id);
+  buildPortList(filtered);
+  document.getElementById("port-count").textContent = `${filtered.length} ports${id!=="all"?" for "+OFFICES[id].short:""} across ${[...new Set(filtered.map(p=>p.country))].length} countries`;
+}
+
+document.querySelectorAll(".fbtn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    const id = btn.dataset.id;
+    if(id === activeFilter && id !== "all") { setFilter("all"); return; }
+    setFilter(id);
+    if(id !== "all") selectOffice(id);
+    else { document.getElementById("detail-panel").classList.remove("visible"); }
+  });
+});
+
+document.getElementById("reset-btn").addEventListener("click", () => {
+  setFilter("all");
+  selectedItem = null;
+  document.getElementById("detail-panel").classList.remove("visible");
+  svg.transition().duration(600).call(zoom.transform, d3.zoomIdentity);
+});
+
+document.getElementById("dp-close").addEventListener("click", () => {
+  document.getElementById("detail-panel").classList.remove("visible");
+  selectedItem = null;
+  document.querySelectorAll(".port-item").forEach(el => el.classList.remove("active"));
+});
+
+document.getElementById("search-input").addEventListener("input", function(){
+  const q = this.value.toLowerCase();
+  const base = activeFilter==="all" ? PORTS : PORTS.filter(p=>p.office===activeFilter);
+  const filtered = q ? base.filter(p => p.name.toLowerCase().includes(q) || p.country.toLowerCase().includes(q)) : base;
+  buildPortList(filtered);
+});
+
+window.addEventListener("resize", () => {
+  const s = getSize();
+  w = s.w; h = s.h;
+  svg.attr("viewBox",`0 0 ${w} ${h}`).attr("width",w).attr("height",h);
+  proj.scale(w/6).translate([w/2, h/2+20]);
+});
+</script>
+</body>
+</html>
